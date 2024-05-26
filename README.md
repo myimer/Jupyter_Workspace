@@ -113,3 +113,140 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ---
 
 Happy coding!
+
+## Adding an Azure SQL Database to the Environment
+
+Follow these steps to integrate an Azure SQL Database into your project:
+
+### Step 1: Set Up Your Azure Database
+
+1. **Create an Azure SQL Database**:
+   - Log in to the [Azure Portal](https://portal.azure.com/).
+   - Click on `Create a resource` and select `SQL Database`.
+   - Fill in the required details to create a new SQL database and server.
+
+2. **Obtain Connection Details**:
+   - Once the database is created, navigate to the database and find the connection string in the `Connection strings` section.
+   - Note down the server name, database name, username, and password.
+
+### Step 2: Install Required Packages
+
+Activate your virtual environment and run the following commands:
+
+```sh
+pip install pyodbc
+pip install azure-identity
+pip install python-dotenv
+```
+
+### Step 3: Configure the Database Connection in Your Environment
+
+1. **Create a Configuration File**:
+   - Create a file named `config.py` in your project directory to store the connection configuration.
+
+   ```python
+   import os
+   from dotenv import load_dotenv
+
+   load_dotenv()
+
+   DATABASE_CONFIG = {
+       'server': os.getenv('DB_SERVER', 'your_server.database.windows.net'),
+       'database': os.getenv('DB_NAME', 'your_database'),
+       'username': os.getenv('DB_USERNAME', 'your_username'),
+       'password': os.getenv('DB_PASSWORD', 'your_password')
+   }
+   ```
+
+2. **Set Environment Variables**:
+   - It’s a good practice to store sensitive information like database credentials in environment variables. You can set these in your operating system or use a `.env` file.
+
+   Create a `.env` file in your project directory:
+
+   ```plaintext
+   DB_SERVER=your_server.database.windows.net
+   DB_NAME=your_database
+   DB_USERNAME=your_username
+   DB_PASSWORD=your_password
+   ```
+
+### Step 4: Connect to the Azure Database
+
+Create a Python script or Jupyter notebook to connect to the Azure database using the `pyodbc` package.
+
+Here’s an example script (`connect_db.py`):
+
+```python
+import pyodbc
+from config import DATABASE_CONFIG
+
+# Construct the connection string
+connection_string = (
+    f"DRIVER={{ODBC Driver 17 for SQL Server}};"
+    f"SERVER={DATABASE_CONFIG['server']};"
+    f"DATABASE={DATABASE_CONFIG['database']};"
+    f"UID={DATABASE_CONFIG['username']};"
+    f"PWD={DATABASE_CONFIG['password']}"
+)
+
+# Establish the connection
+try:
+    conn = pyodbc.connect(connection_string)
+    print("Connection successful!")
+except Exception as e:
+    print(f"Error: {e}")
+
+# Sample query
+cursor = conn.cursor()
+cursor.execute("SELECT @@VERSION")
+row = cursor.fetchone()
+while row:
+    print(row[0])
+    row = cursor.fetchone()
+
+# Close the connection
+conn.close()
+```
+
+### Step 5: Run the Script
+
+Run the script to test the connection:
+
+```sh
+python connect_db.py
+```
+
+### Step 6: Use the Database in Your Jupyter Notebook
+
+You can also connect to the Azure database in a Jupyter Notebook. Here’s an example:
+
+```python
+import pyodbc
+from config import DATABASE_CONFIG
+
+# Construct the connection string
+connection_string = (
+    f"DRIVER={{ODBC Driver 17 for SQL Server}};"
+    f"SERVER={DATABASE_CONFIG['server']};"
+    f"DATABASE={DATABASE_CONFIG['database']};"
+    f"UID={DATABASE_CONFIG['username']};"
+    f"PWD={DATABASE_CONFIG['password']}"
+)
+
+# Establish the connection
+conn = pyodbc.connect(connection_string)
+print("Connection successful!")
+
+# Sample query
+cursor = conn.cursor()
+cursor.execute("SELECT @@VERSION")
+row = cursor.fetchone()
+while row:
+    print(row[0])
+    row = cursor.fetchone()
+
+# Close the connection
+conn.close()
+```
+
+By following these steps, you will be able to integrate an Azure SQL Database into your environment and use it in your project.
